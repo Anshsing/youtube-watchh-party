@@ -1,0 +1,21 @@
+# Render blueprint — deploy the backend with one click
+# https://render.com/docs/blueprint-spec
+#
+# Note: PORT is automatically provided by Render, don't set it here.
+# After your first deploy, come back and set CORS_ORIGIN to your Vercel URL.
+
+services:
+  - type: web
+    name: watchparty-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install --production
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      - key: CORS_ORIGIN
+        sync: false

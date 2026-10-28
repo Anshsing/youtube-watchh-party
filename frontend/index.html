@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Watch YouTube videos together in perfect real-time sync. Create or join a WatchParty room and enjoy movies, music, and videos with friends.">
+  <meta name="theme-color" content="#050608">
+  <meta property="og:title" content="WatchParty — Watch Together in Sync">
+  <meta property="og:description" content="Create a room, share the code, and watch YouTube videos in perfect sync with friends.">
+  <meta property="og:type" content="website">
+  <title>WatchParty — Watch Together in Sync</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body class="landing-body">
+
+  <!-- ── Animated background orbs ─────────────────────────────────────── -->
+  <div class="hero-bg" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────────── -->
+  <div class="landing-container">
+
+    <!-- Branding -->
+    <header class="landing-header">
+      <span class="landing-logo" role="img" aria-label="Movie camera">🎬</span>
+      <h1 class="landing-title">WatchParty</h1>
+      <p class="landing-subtitle">Watch YouTube together, perfectly in sync</p>
+    </header>
+
+    <!-- Kicked notice (shown when redirected after being removed from a room) -->
+    <div id="kicked-msg" class="notice-banner error hidden" role="alert">
+      <span aria-hidden="true">🚫</span>
+      <span>You were removed from that room.</span>
+    </div>
+
+    <!-- Card -->
+    <main class="landing-card">
+
+      <!-- Display name -->
+      <div class="form-group">
+        <label class="form-label" for="name-input">Your Display Name</label>
+        <input
+          id="name-input"
+          class="input"
+          type="text"
+          placeholder="e.g. Alice, Bob…"
+          maxlength="30"
+          autocomplete="nickname"
+          spellcheck="false"
+          aria-required="true"
+          aria-describedby="name-error"
+        >
+        <div id="name-error" class="error-msg" role="alert" aria-live="polite"></div>
+      </div>
+
+      <!-- Create / Join tabs -->
+      <div class="action-tabs" role="tablist" aria-label="Room action">
+        <button id="tab-create" class="tab-btn active" role="tab" aria-selected="true"  aria-controls="create-panel">✨ Create Room</button>
+        <button id="tab-join"   class="tab-btn"        role="tab" aria-selected="false" aria-controls="join-panel">🔗 Join Room</button>
+      </div>
+
+      <!-- Create panel -->
+      <div id="create-panel" role="tabpanel">
+        <button id="create-btn" class="btn btn-primary btn-full btn-lg" type="button">
+          Create New Room
+        </button>
+      </div>
+
+      <!-- Join panel (hidden until tab-join clicked) -->
+      <div id="join-section" class="join-section hidden" role="tabpanel">
+        <div class="form-group" style="margin-top:1.25rem; margin-bottom:0">
+          <label class="form-label" for="code-input">Room Code</label>
+          <div class="action-row">
+            <input
+              id="code-input"
+              class="input"
+              type="text"
+              placeholder="6-character code"
+              maxlength="6"
+              autocomplete="off"
+              spellcheck="false"
+              aria-required="true"
+              aria-describedby="code-error"
+              style="text-transform:uppercase; letter-spacing:0.14em; font-weight:700;"
+            >
+            <button id="join-btn" class="btn btn-primary" type="button">Join</button>
+          </div>
+          <div id="code-error" class="error-msg" role="alert" aria-live="polite"></div>
+        </div>
+      </div>
+
+    </main><!-- /landing-card -->
+
+    <footer class="landing-footer">
+      Powered by YouTube IFrame API &amp; WebSockets
+    </footer>
+
+  </div><!-- /landing-container -->
+
+  <script src="/js/landing.js"></script>
+</body>
+</html>

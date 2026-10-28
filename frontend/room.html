@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050608">
+  <meta name="robots" content="noindex">
+  <title>WatchParty — Room</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body class="room-body">
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════════════════════════════════════ -->
+  <header class="room-header">
+
+    <!-- Logo (links back to lobby) -->
+    <a href="/" class="header-logo" title="Back to lobby">
+      <span class="logo-icon" aria-hidden="true">🎬</span>
+      <span class="logo-text">WatchParty</span>
+    </a>
+
+    <div class="header-sep" aria-hidden="true"></div>
+
+    <!-- Room code chip -->
+    <div class="room-code-section">
+      <span class="room-code-label">Room</span>
+      <button
+        id="room-code-btn"
+        class="room-code-chip"
+        title="Click to copy room link"
+        aria-label="Copy room link"
+      >
+        <span id="room-code-text">——————</span>
+        <!-- Copy icon -->
+        <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13" aria-hidden="true">
+          <path d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V2zM6 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H6z"/>
+          <path d="M2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h-1v1H2V6h1V5H2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="header-spacer"></div>
+
+    <!-- Right: viewer count, role badge, connection dot -->
+    <div class="header-right">
+      <span id="viewer-count" class="viewer-count" aria-live="polite">
+        <span class="vc-dot" aria-hidden="true"></span>0 watching
+      </span>
+      <span id="my-role-badge" class="badge badge-participant" aria-label="Your role">Participant</span>
+      <div
+        id="conn-dot"
+        class="status-dot status-connecting"
+        title="Connection status"
+        role="status"
+        aria-label="Connecting…"
+      ></div>
+    </div>
+
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       MAIN GRID  (player | sidebar)
+  ══════════════════════════════════════════════════════════════════════ -->
+  <main class="room-main">
+
+    <!-- ── Player Section ─────────────────────────────────────────────── -->
+    <section class="player-section" aria-label="Video player">
+
+      <!-- Player area with layered overlays -->
+      <div class="player-outer" id="player-outer">
+
+        <!-- YouTube IFrame is injected here by the YT API -->
+        <div id="yt-player"></div>
+
+        <!-- Viewer overlay (blocks pointer events for non-controllers) -->
+        <div
+          id="player-overlay"
+          class="player-overlay"
+          aria-hidden="true"
+        ></div>
+
+        <!-- No-video placeholder (z-index:8, hidden once a video loads) -->
+        <div id="no-video" class="no-video-placeholder" aria-live="polite">
+          <div class="placeholder-icon" aria-hidden="true">🎬</div>
+          <h2>No video loaded</h2>
+          <p id="no-video-hint">Waiting for the host to load a video…</p>
+        </div>
+
+        <!-- Player initialising overlay (z-index:10, hidden after player is ready) -->
+        <div id="player-loading" class="player-loading">
+          <div class="spinner spinner-lg" role="status" aria-label="Loading YouTube player"></div>
+          <p>Initializing player…</p>
+        </div>
+
+      </div><!-- /player-outer -->
+
+      <!-- ── Controls Bar ─────────────────────────────────────────────── -->
+      <div id="controls-bar" class="controls-bar" aria-label="Playback controls">
+
+        <!-- Video URL row (host / moderator only) -->
+        <div id="video-url-section" class="video-url-row hidden">
+          <input
+            id="video-url-input"
+            class="video-url-input"
+            type="url"
+            placeholder="Paste a YouTube URL or video ID…"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="YouTube video URL"
+          >
+          <button id="load-video-btn" class="btn btn-primary btn-sm" type="button">Load</button>
+        </div>
+
+        <!-- Playback row -->
+        <div class="playback-row">
+
+          <!-- Play -->
+          <button id="play-btn" class="control-btn" title="Play" aria-label="Play" disabled>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+
+          <!-- Pause -->
+          <button id="pause-btn" class="control-btn" title="Pause" aria-label="Pause" disabled>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          </button>
+
+          <!-- Seek bar + timestamps -->
+          <div class="seek-container">
+            <span id="current-time" class="time-label" aria-label="Current time">0:00</span>
+            <input
+              type="range"
+              id="seek-bar"
+              class="seek-bar"
+              min="0" max="100" value="0" step="0.1"
+              aria-label="Seek to position"
+              disabled
+            >
+            <span id="total-time" class="time-label right" aria-label="Total duration">0:00</span>
+          </div>
+
+          <!-- Watch-only notice (shown for participant / viewer) -->
+          <div id="viewer-notice" class="viewer-notice" aria-live="polite">
+            <span aria-hidden="true">👁</span>Watch only
+          </div>
+
+        </div><!-- /playback-row -->
+      </div><!-- /controls-bar -->
+
+    </section><!-- /player-section -->
+
+    <!-- ── Participant Sidebar ─────────────────────────────────────────── -->
+    <aside class="sidebar" aria-label="Participants">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Participants</span>
+        <span id="participant-count" class="badge badge-count" aria-live="polite">0</span>
+      </div>
+      <div
+        id="participants-list"
+        class="participants-list"
+        role="list"
+        aria-label="Participant list"
+      ></div>
+    </aside>
+
+  </main><!-- /room-main -->
+
+  <!-- ── Toast notifications ─────────────────────────────────────────────── -->
+  <div
+    id="toast-container"
+    class="toast-container"
+    aria-live="assertive"
+    aria-atomic="false"
+  ></div>
+
+  <!-- ── Context menu (host only, appears on participant click) ───────────── -->
+  <div
+    id="ctx-menu"
+    class="context-menu hidden"
+    role="menu"
+    aria-label="Participant actions"
+  >
+    <div id="ctx-name" class="ctx-header">User</div>
+    <div class="ctx-sep" role="separator"></div>
+    <button id="ctx-mod"    class="ctx-btn" role="menuitem">🛡 Make Moderator</button>
+    <button id="ctx-part"   class="ctx-btn" role="menuitem">👤 Make Participant</button>
+    <button id="ctx-viewer" class="ctx-btn" role="menuitem">👁 Make Viewer</button>
+    <div class="ctx-sep" role="separator"></div>
+    <button id="ctx-host"   class="ctx-btn" role="menuitem">👑 Transfer Host</button>
+    <div class="ctx-sep" role="separator"></div>
+    <button id="ctx-kick"   class="ctx-btn danger" role="menuitem">🚫 Remove from Room</button>
+  </div>
+
+  <!-- ── Scripts ───────────────────────────────────────────────────────────── -->
+  <script src="/js/config.js"></script>
+  <script src="/js/socket.js"></script>
+  <script src="/js/player.js"></script>
+  <script src="/js/room.js"></script>
+
+</body>
+</html>
