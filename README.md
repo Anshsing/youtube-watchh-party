@@ -1,126 +1,95 @@
-# 🎬 WatchParty — YouTube Watch Together
+# 🎬 WatchParty
 
-Watch YouTube videos in perfect real-time sync with friends. Create a room, share the code, and enjoy together.
+Watch YouTube videos in real-time sync with friends. Create a room, share the code, and enjoy together.
 
 ## Features
 
-- **Real-time sync** — Play, pause, seek, and video changes sync across all clients
-- **Room-based** — Create or join rooms with 6-character codes
-- **Role system** — Host, Moderator, Participant, Viewer roles with granular permissions
+- **Real-time sync** — Play, pause, seek, and video changes sync across all clients instantly
+- **Room codes** — Create or join rooms with 6-character codes
+- **Role system** — Host, Moderator, Participant, Viewer with different permissions
 - **Drift correction** — Accounts for network latency to keep everyone in sync
-- **Auto host promotion** — If the host leaves, the next person is promoted automatically
-- **Premium UI** — Glassmorphic dark design with smooth animations
+- **Auto host promotion** — If the host leaves, the next person is automatically promoted
+- **Single deployment** — Frontend and backend served from the same Render instance
 
-## Architecture
+## Project Structure
 
 ```
 Youtube_Watch_party/
-├── backend/          → Node.js + Express + WebSocket server (deploy to Render)
+├── backend/                  ← Node.js server (deployed to Render)
 │   ├── server/
-│   │   ├── config/   → Constants & role definitions
-│   │   ├── core/     → RoomManager, RoleManager
-│   │   ├── handlers/ → room, sync, role WebSocket handlers
-│   │   ├── middleware/→ Permission guards
-│   │   ├── routes/   → REST API (/api/health, /api/stats)
-│   │   ├── utils/    → Logger, WS helpers
-│   │   ├── wsRouter.js
-│   │   └── index.js  → Entry point
+│   │   ├── config/           → Role definitions, constants
+│   │   ├── core/             → RoomManager, RoleManager
+│   │   ├── handlers/         → room, sync, role WebSocket handlers
+│   │   ├── middleware/       → Permission guards
+│   │   ├── routes/           → REST API (/api/health, /api/stats)
+│   │   ├── utils/            → Logger, WS send/broadcast helpers
+│   │   ├── wsRouter.js       → Routes incoming WS messages to handlers
+│   │   └── index.js          → Entry point — HTTP + WebSocket + static serving
+│   ├── .env.example
 │   ├── package.json
-│   └── render.yaml   → Render blueprint
+│   └── render.yaml           → Render deployment blueprint
 │
-└── frontend/         → Static HTML/CSS/JS (deploy to Vercel)
-    ├── css/main.css  → Design system
+└── frontend/                 ← Static files served by the backend
+    ├── css/main.css          → Design system
     ├── js/
-    │   ├── config.js → ⚠️ Set your Render backend URL here
-    │   ├── socket.js → WebSocket client
-    │   ├── player.js → YouTube IFrame API wrapper
-    │   ├── landing.js→ Landing page controller
-    │   └── room.js   → Room controller
-    ├── index.html    → Landing page
-    ├── room.html     → Room page
-    └── vercel.json   → Vercel config
+    │   ├── config.js         → Frontend config (WS_URL — leave as null)
+    │   ├── socket.js         → WebSocket client
+    │   ├── player.js         → YouTube IFrame API wrapper
+    │   ├── landing.js        → Landing page controller
+    │   └── room.js           → Room controller
+    ├── index.html            → Landing page
+    └── room.html             → Room page
 ```
 
 ## Local Development
 
 ```bash
-# 1. Install backend dependencies
 cd backend
 npm install
-
-# 2. Start the server (serves frontend too at localhost:3000)
 npm run dev
-
-# 3. Open http://localhost:3000
 ```
 
-## Deployment (Free Tier)
+Then open **http://localhost:3000**.
 
-### Step 1: Deploy Backend to Render
+The server serves the `frontend/` folder as static files, so both the UI and WebSocket run on the same port — no separate frontend server needed.
 
-1. Push your code to GitHub
-2. Go to [render.com](https://render.com) → **New** → **Web Service**
-3. Connect your GitHub repo
-4. Set **Root Directory** to `backend`
-5. **Build Command:** `npm install`
-6. **Start Command:** `npm start`
-7. Choose **Free** plan
-8. Add environment variables:
-   - `NODE_ENV` = `production`
-   - `CORS_ORIGIN` = `https://your-app.vercel.app` (set after Vercel deploy)
-9. Deploy — note your URL: `https://your-app.onrender.com`
+## Deployment (Render — free tier)
 
-### Step 2: Deploy Frontend to Vercel
+Everything deploys from a single Render Web Service. The Express server handles HTTP, WebSocket, and serves the frontend static files all on one URL.
 
-1. Go to [vercel.com](https://vercel.com) → **New Project**
-2. Import your GitHub repo
-3. Set **Root Directory** to `frontend`
-4. **Framework Preset:** Other
-5. **Build Command:** _(leave empty — static files, no build)_
-6. **Output Directory:** `.`
-7. Deploy — note your URL: `https://your-app.vercel.app`
+### Steps
 
-### Step 3: Connect Them
+1. **Push your repo to GitHub**
 
-1. **Frontend → Backend:** Edit `frontend/js/config.js`:
-   ```js
-   WS_URL: 'wss://your-app.onrender.com'
-   ```
-   Redeploy frontend.
+2. **Create a Web Service on [render.com](https://render.com)**
+   - Connect your GitHub repo
+   - **Root Directory:** `backend`
+   - **Build Command:** `npm install --production`
+   - **Start Command:** `npm start`
+   - **Plan:** Free
 
-2. **Backend → Frontend (CORS):** In Render dashboard, set:
-   ```
-   CORS_ORIGIN = https://your-app.vercel.app
-   ```
+3. **That's it.** Your app will be live at `https://your-app.onrender.com`
 
-### ⚠️ Render Free Tier Notes
-
-- Free services **spin down after 15 minutes of inactivity**
-- First connection after idle takes ~30-60 seconds (cold start)
-- WebSockets are fully supported on Render free tier
+> **Note:** Render free tier spins down after 15 minutes of inactivity. The first request after idle takes ~30–60 seconds to wake up. WebSockets are fully supported.
 
 ## API Endpoints
 
 | Endpoint | Description |
 |---|---|
-| `GET /api/health` | Liveness probe with stats |
-| `GET /api/stats` | Room count + participant count |
-| `GET /api/rooms/:code` | Public room state snapshot |
+| `GET /api/health` | Server liveness + stats |
+| `GET /api/stats` | Room and participant counts |
+| `GET /api/rooms/:code` | Public room state (for debugging) |
 
-## WebSocket Protocol
+## WebSocket Events
 
 | Client → Server | Description |
 |---|---|
-| `create` | Create a new room |
-| `join` | Join an existing room |
-| `play` | Start playback |
-| `pause` | Pause playback |
+| `create` | Create a new room (caller becomes host) |
+| `join` | Join an existing room by code |
+| `play` | Start playback at position |
+| `pause` | Pause at position |
 | `seek` | Seek to position |
 | `change_video` | Load a new YouTube video |
-| `assign_role` | Change a user's role (host only) |
-| `kick` | Remove a user (host only) |
-| `transfer_host` | Transfer host to another user |
-
-## License
-
-MIT
+| `assign_role` | Change a participant's role (host only) |
+| `kick` | Remove a participant (host only) |
+| `transfer_host` | Hand off host to another participant |

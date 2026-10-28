@@ -1,12 +1,11 @@
-# Render blueprint — deploy the backend with one click
-# https://render.com/docs/blueprint-spec
+# Render deployment config for WatchParty
 #
-# Note: PORT is automatically provided by Render, don't set it here.
-# After your first deploy, come back and set CORS_ORIGIN to your Vercel URL.
+# The backend serves the frontend too, so this is a single full-stack deployment.
+# Render auto-assigns PORT — don't set it here.
 
 services:
   - type: web
-    name: watchparty-backend
+    name: watchparty
     runtime: node
     rootDir: backend
     buildCommand: npm install --production
@@ -17,5 +16,3 @@ services:
         value: production
       - key: LOG_LEVEL
         value: info
-      - key: CORS_ORIGIN
-        sync: false

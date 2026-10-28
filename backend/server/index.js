@@ -19,17 +19,17 @@ app.set('trust proxy', 1);
 
 app.use(express.json());
 
-// CORS — in production set CORS_ORIGIN to your Vercel frontend URL
-app.use((req, res, next) => {
-  const origin = process.env.CORS_ORIGIN || '*';
-  res.setHeader('Access-Control-Allow-Origin',  origin);
+// CORS — frontend and backend share the same origin so this mainly
+// helps when hitting the API directly from dev tools or monitoring.
+app.use((_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin',  '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  if (_req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
 
-// Serve the frontend locally (in prod, frontend is on Vercel)
+// Serve the frontend — same server handles both HTTP and WebSocket
 app.use(express.static(path.join(__dirname, '../../frontend')));
 
 // REST API
