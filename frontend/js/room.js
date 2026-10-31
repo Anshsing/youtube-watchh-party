@@ -3,19 +3,19 @@
 // ─── State ────────────────────────────────────────────────────────────────────
 
 const state = {
-  userId:       null,
-  role:         null,
-  roomCode:     null,
-  userName:     null,
+  userId: null,
+  role: null,
+  roomCode: null,
+  userName: null,
   participants: new Map(),
-  playerReady:  false,
-  pendingSync:  null,
+  playerReady: false,
+  pendingSync: null,
   seekDragging: false,
 };
 
-let socket     = null;
-let ytPlayer   = null;
-let ctxTarget  = null;
+let socket = null;
+let ytPlayer = null;
+let ctxTarget = null;
 let progressId = null;
 
 // DOM element references — populated in init()
@@ -24,7 +24,7 @@ const el = {};
 // ─── Permission helpers ───────────────────────────────────────────────────────
 
 const canControl = () => state.role === 'host' || state.role === 'moderator';
-const isHost     = () => state.role === 'host';
+const isHost = () => state.role === 'host';
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
@@ -91,34 +91,34 @@ function setConnStatus(status) {
 
 async function init() {
   // Cache DOM refs
-  el.toastContainer   = document.getElementById('toast-container');
-  el.connDot          = document.getElementById('conn-dot');
-  el.roomCodeBtn      = document.getElementById('room-code-btn');
-  el.roomCodeText     = document.getElementById('room-code-text');
-  el.viewerCount      = document.getElementById('viewer-count');
-  el.myRoleBadge      = document.getElementById('my-role-badge');
-  el.playerOuter      = document.getElementById('player-outer');
-  el.playerLoading    = document.getElementById('player-loading');
-  el.noVideo          = document.getElementById('no-video');
-  el.noVideoHint      = document.getElementById('no-video-hint');
-  el.playerOverlay    = document.getElementById('player-overlay');
-  el.videoUrlSection  = document.getElementById('video-url-section');
-  el.videoUrlInput    = document.getElementById('video-url-input');
-  el.loadVideoBtn     = document.getElementById('load-video-btn');
-  el.playBtn          = document.getElementById('play-btn');
-  el.pauseBtn         = document.getElementById('pause-btn');
-  el.seekBar          = document.getElementById('seek-bar');
-  el.currentTime      = document.getElementById('current-time');
-  el.totalTime        = document.getElementById('total-time');
-  el.viewerNotice     = document.getElementById('viewer-notice');
+  el.toastContainer = document.getElementById('toast-container');
+  el.connDot = document.getElementById('conn-dot');
+  el.roomCodeBtn = document.getElementById('room-code-btn');
+  el.roomCodeText = document.getElementById('room-code-text');
+  el.viewerCount = document.getElementById('viewer-count');
+  el.myRoleBadge = document.getElementById('my-role-badge');
+  el.playerOuter = document.getElementById('player-outer');
+  el.playerLoading = document.getElementById('player-loading');
+  el.noVideo = document.getElementById('no-video');
+  el.noVideoHint = document.getElementById('no-video-hint');
+  el.playerOverlay = document.getElementById('player-overlay');
+  el.videoUrlSection = document.getElementById('video-url-section');
+  el.videoUrlInput = document.getElementById('video-url-input');
+  el.loadVideoBtn = document.getElementById('load-video-btn');
+  el.playBtn = document.getElementById('play-btn');
+  el.pauseBtn = document.getElementById('pause-btn');
+  el.seekBar = document.getElementById('seek-bar');
+  el.currentTime = document.getElementById('current-time');
+  el.totalTime = document.getElementById('total-time');
+  el.viewerNotice = document.getElementById('viewer-notice');
   el.participantsList = document.getElementById('participants-list');
   el.participantCount = document.getElementById('participant-count');
-  el.ctxMenu          = document.getElementById('ctx-menu');
-  el.ctxName          = document.getElementById('ctx-name');
+  el.ctxMenu = document.getElementById('ctx-menu');
+  el.ctxName = document.getElementById('ctx-name');
 
   // Read URL params
-  const params   = new URLSearchParams(location.search);
-  const action   = params.get('action');
+  const params = new URLSearchParams(location.search);
+  const action = params.get('action');
   const codeParam = params.get('code')?.trim().toUpperCase();
 
   // Name is stored by the landing page before redirecting here
@@ -132,7 +132,7 @@ async function init() {
 
   // Determine what we're doing before connecting
   const isCreating = action === 'create';
-  const isJoining  = !isCreating && !!codeParam;
+  const isJoining = !isCreating && !!codeParam;
 
   if (!isCreating && !isJoining) {
     window.location.href = '/';
@@ -143,9 +143,9 @@ async function init() {
   // starting it now means it'll likely be ready by the time we need it.
   ytPlayer = new YouTubePlayer({
     containerId: 'yt-player',
-    onReady:  onPlayerReady,
-    onPlay:   onPlayerPlay,
-    onPause:  onPlayerPause,
+    onReady: onPlayerReady,
+    onPlay: onPlayerPlay,
+    onPause: onPlayerPause,
   });
   ytPlayer.init();
 
@@ -158,16 +158,16 @@ async function init() {
   socket = new WatchPartySocket(wsUrl);
 
   socket
-    .on('created',          onCreated)
-    .on('joined',           onJoined)
-    .on('sync',             onSync)
-    .on('user_joined',      onUserJoined)
-    .on('user_left',        onUserLeft)
-    .on('role_assigned',    onRoleAssigned)
+    .on('created', onCreated)
+    .on('joined', onJoined)
+    .on('sync', onSync)
+    .on('user_joined', onUserJoined)
+    .on('user_left', onUserLeft)
+    .on('role_assigned', onRoleAssigned)
     .on('host_transferred', onHostTransferred)
-    .on('kicked',           onKicked)
-    .on('error',            onServerError)
-    .on('close',            onDisconnected);
+    .on('kicked', onKicked)
+    .on('error', onServerError)
+    .on('close', onDisconnected);
 
   try {
     await socket.connect();
@@ -194,8 +194,8 @@ async function init() {
 // ─── Server event handlers ────────────────────────────────────────────────────
 
 function onCreated(payload) {
-  state.userId   = payload.userId;
-  state.role     = payload.role;
+  state.userId = payload.userId;
+  state.role = payload.role;
   state.roomCode = payload.code;
 
   // Update the URL so the room code is visible and shareable
@@ -209,8 +209,8 @@ function onCreated(payload) {
 }
 
 function onJoined(payload) {
-  state.userId   = payload.userId;
-  state.role     = payload.role;
+  state.userId = payload.userId;
+  state.role = payload.role;
   state.roomCode = payload.code;
   applyRoomState(payload.roomState);
   toast(`Joined room ${payload.code}`, 'success');
@@ -234,7 +234,7 @@ function applyRoomState(rs) {
       action: 'change_video',
       videoId,
       position: position || 0,
-      playing:  !!playing,
+      playing: !!playing,
       serverTime: updatedAt,
     };
     if (state.playerReady) applySync(syncPayload);
@@ -276,9 +276,9 @@ function onRoleAssigned(payload) {
 
 function onHostTransferred(payload) {
   const fromP = state.participants.get(payload.fromUserId);
-  const toP   = state.participants.get(payload.toUserId);
+  const toP = state.participants.get(payload.toUserId);
   if (fromP) fromP.role = 'participant';
-  if (toP)   toP.role   = 'host';
+  if (toP) toP.role = 'host';
 
   if (payload.toUserId === state.userId) {
     state.role = 'host';
@@ -347,7 +347,7 @@ function applySync(payload) {
       ytPlayer.loadVideo(videoId);
       setTimeout(() => {
         if (playing) { ytPlayer.seekTo(targetPos); ytPlayer.play(); }
-        else         { ytPlayer.seekTo(position); }
+        else { ytPlayer.seekTo(position); }
       }, 1200);
       break;
 
@@ -378,10 +378,10 @@ function updateProgress() {
   const dur = ytPlayer.getDuration();
   if (!isFinite(cur) || !isFinite(dur) || dur <= 0) return;
 
-  el.seekBar.max   = dur;
+  el.seekBar.max = dur;
   el.seekBar.value = cur;
   el.currentTime.textContent = fmt(cur);
-  el.totalTime.textContent   = fmt(dur);
+  el.totalTime.textContent = fmt(dur);
 }
 
 // ─── UI events ────────────────────────────────────────────────────────────────
@@ -411,7 +411,7 @@ function setupUIEvents() {
 
   // Seek bar
   const startSeek = () => { state.seekDragging = true; };
-  el.seekBar.addEventListener('mousedown',  startSeek);
+  el.seekBar.addEventListener('mousedown', startSeek);
   el.seekBar.addEventListener('touchstart', startSeek, { passive: true });
 
   el.seekBar.addEventListener('input', () => {
@@ -425,7 +425,7 @@ function setupUIEvents() {
       socket.send('seek', { position: parseFloat(el.seekBar.value) });
     }
   };
-  el.seekBar.addEventListener('mouseup',  endSeek);
+  el.seekBar.addEventListener('mouseup', endSeek);
   el.seekBar.addEventListener('touchend', endSeek);
 
   // Close context menu on outside click
@@ -434,11 +434,11 @@ function setupUIEvents() {
   });
 
   // Context menu actions
-  document.getElementById('ctx-mod').addEventListener('click',    () => doCtxAction('assign_role', { role: 'moderator' }));
-  document.getElementById('ctx-part').addEventListener('click',   () => doCtxAction('assign_role', { role: 'participant' }));
+  document.getElementById('ctx-mod').addEventListener('click', () => doCtxAction('assign_role', { role: 'moderator' }));
+  document.getElementById('ctx-part').addEventListener('click', () => doCtxAction('assign_role', { role: 'participant' }));
   document.getElementById('ctx-viewer').addEventListener('click', () => doCtxAction('assign_role', { role: 'viewer' }));
-  document.getElementById('ctx-host').addEventListener('click',   () => doCtxAction('transfer_host', {}));
-  document.getElementById('ctx-kick').addEventListener('click',   () => doCtxAction('kick', {}));
+  document.getElementById('ctx-host').addEventListener('click', () => doCtxAction('transfer_host', {}));
+  document.getElementById('ctx-kick').addEventListener('click', () => doCtxAction('kick', {}));
 }
 
 function doCtxAction(type, extra) {
@@ -449,7 +449,7 @@ function doCtxAction(type, extra) {
 
 function loadVideo() {
   const raw = el.videoUrlInput.value.trim();
-  const id  = extractVideoId(raw);
+  const id = extractVideoId(raw);
   if (!id) {
     toast('Paste a valid YouTube URL or video ID', 'error');
     return;
@@ -468,18 +468,18 @@ function showCtxMenu(userId, participant, anchorEl) {
   // Position next to the clicked item, flip if it would go off-screen
   const rect = anchorEl.getBoundingClientRect();
   const mw = 195, mh = 210;
-  let top  = rect.top;
+  let top = rect.top;
   let left = rect.right + 8;
-  if (left + mw > window.innerWidth)  left = rect.left - mw - 8;
-  if (top  + mh > window.innerHeight) top  = window.innerHeight - mh - 8;
-  el.ctxMenu.style.top  = `${Math.max(8, top)}px`;
+  if (left + mw > window.innerWidth) left = rect.left - mw - 8;
+  if (top + mh > window.innerHeight) top = window.innerHeight - mh - 8;
+  el.ctxMenu.style.top = `${Math.max(8, top)}px`;
   el.ctxMenu.style.left = `${Math.max(8, left)}px`;
 
   // Hide role options that are already the target's current role
   const r = participant.role;
-  document.getElementById('ctx-mod').style.display    = r === 'moderator'  ? 'none' : 'flex';
-  document.getElementById('ctx-part').style.display   = r === 'participant' ? 'none' : 'flex';
-  document.getElementById('ctx-viewer').style.display = r === 'viewer'      ? 'none' : 'flex';
+  document.getElementById('ctx-mod').style.display = r === 'moderator' ? 'none' : 'flex';
+  document.getElementById('ctx-part').style.display = r === 'participant' ? 'none' : 'flex';
+  document.getElementById('ctx-viewer').style.display = r === 'viewer' ? 'none' : 'flex';
 }
 
 function closeCtxMenu() {
@@ -495,16 +495,16 @@ function updateRoomCode(code) {
 }
 
 function updateRoleUI() {
-  const r    = state.role || 'participant';
+  const r = state.role || 'participant';
   const ctrl = canControl();
 
-  el.myRoleBadge.className   = `badge badge-${r}`;
+  el.myRoleBadge.className = `badge badge-${r}`;
   el.myRoleBadge.textContent = r.charAt(0).toUpperCase() + r.slice(1);
 
   el.videoUrlSection.classList.toggle('hidden', !ctrl);
-  el.playBtn.disabled  = !ctrl;
+  el.playBtn.disabled = !ctrl;
   el.pauseBtn.disabled = !ctrl;
-  el.seekBar.disabled  = !ctrl;
+  el.seekBar.disabled = !ctrl;
   el.viewerNotice.classList.toggle('hidden', ctrl);
 
   // Overlay blocks viewer from clicking inside the player
@@ -535,10 +535,10 @@ function renderParticipants() {
 }
 
 function buildParticipantEl(uid, p, isMe) {
-  const div       = document.createElement('div');
+  const div = document.createElement('div');
   const clickable = isHost() && !isMe;
 
-  div.className   = ['participant-item', isMe ? 'me' : '', clickable ? 'clickable' : '', 'new-item']
+  div.className = ['participant-item', isMe ? 'me' : '', clickable ? 'clickable' : '', 'new-item']
     .filter(Boolean).join(' ');
   div.dataset.uid = uid;
   div.setAttribute('role', 'listitem');

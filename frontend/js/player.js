@@ -64,7 +64,7 @@ class YouTubePlayer {
       width:  '100%',
       videoId: '',
       playerVars: {
-        controls:       0,  // hide native controls (we provide our own)
+        controls:       1,  // keep native controls as fallback (required on some HTTPS origins)
         disablekb:      1,  // disable keyboard shortcuts in iframe
         modestbranding: 1,
         rel:            0,  // no related videos
@@ -72,11 +72,19 @@ class YouTubePlayer {
         iv_load_policy: 3,  // hide annotations
         cc_load_policy: 0,
         fs:             1,
+        enablejsapi:    1,  // REQUIRED for JS API control
+        origin:         location.origin, // REQUIRED on HTTPS to avoid black screen
       },
       events: {
         onReady:       ()  => this._onReady(),
         onStateChange: (e) => this._handleStateChange(e),
-        onError:       (e) => console.error('[Player] YouTube error code:', e.data),
+        onError:       (e) => {
+          console.error('[Player] YouTube error code:', e.data);
+          // Error 150 = embedding not allowed; log clearly for debugging
+          if (e.data === 150 || e.data === 101) {
+            console.warn('[Player] This video cannot be embedded. Try a different video.');
+          }
+        },
       },
     });
   }
@@ -110,8 +118,8 @@ class YouTubePlayer {
     this._currentVideoId = videoId;
     this._suppress(1500);
     if (this.player) {
-      this.player.loadVideoById(videoId);
-      this.player.pauseVideo();
+      // cueVideoById loads without autoplay — more reliable on HTTPS/mobile
+      this.player.cueVideoById({ videoId, startSeconds: 0 });
     }
   }
 

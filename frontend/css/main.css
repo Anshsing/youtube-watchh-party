@@ -327,19 +327,24 @@ body {
 .room-code-section { display:flex; align-items:center; gap:0.5rem; }
 .room-code-label   { font-size:0.7rem; color:var(--text-3); font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
 
-.room-code-chip {
+.room-code-chip,
+.room-code-btn {
   display:flex; align-items:center; gap:0.375rem;
   padding:0.25rem 0.7rem;
   background:var(--surface); border:1px solid var(--border-2); border-radius:var(--r-sm);
   font-size:0.875rem; font-weight:700; letter-spacing:.14em; color:var(--primary-2);
   transition:all var(--t); cursor:pointer;
 }
-.room-code-chip:hover {
+.room-code-chip:hover,
+.room-code-btn:hover {
   background:var(--surface-2); border-color:var(--primary);
   box-shadow: var(--glow-sm);
   transform: translateY(-1px);
 }
-.room-code-chip:active { transform: translateY(0); }
+.room-code-chip:active,
+.room-code-btn:active { transform: translateY(0); }
+.room-code-value { letter-spacing:.14em; color:var(--primary-2); font-weight:700; }
+.copy-icon { opacity: 0.6; flex-shrink: 0; }
 
 .header-spacer { flex:1; }
 .header-right  { display:flex; align-items:center; gap:0.75rem; }
